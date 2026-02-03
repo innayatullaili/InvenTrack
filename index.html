@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pendataan Inventaris - BPS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-laptop"></i>
+                <span>InvenTrack</span>
+            </div>
+            <button class="toggle-btn" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item active" data-page="dashboard">
+                <a href="#dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item" data-page="peminjaman">
+                <a href="#peminjaman">
+                    <i class="fas fa-hand-holding"></i>
+                    <span>Peminjaman</span>
+                </a>
+            </li>
+            <li class="nav-item" data-page="pengembalian">
+                <a href="#pengembalian">
+                    <i class="fas fa-undo"></i>
+                    <span>Pengembalian</span>
+                </a>
+            </li>
+            <li class="nav-item admin-only" data-page="inventaris">
+                <a href="#inventaris">
+                    <i class="fas fa-boxes"></i>
+                    <span>Daftar Inventaris</span>
+                </a>
+            </li>
+            <li class="nav-item" data-page="kerusakan">
+                <a href="#kerusakan">
+                    <i class="fas fa-tools"></i>
+                    <span>Laporan Kerusakan</span>
+                </a>
+            </li>
+
+            <li class="nav-item admin-only" data-page="riwayat">
+                <a href="#riwayat">
+                    <i class="fas fa-history"></i>
+                    <span>Riwayat</span>
+                </a>
+            </li>
+            <li class="nav-item admin-only" data-page="users">
+                <a href="#users">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Kelola User</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name" id="displayUserName">Pengguna</span>
+                    <span class="user-role" id="displayUserRole">Guest</span>
+                </div>
+            </div>
+            <a href="login.html" class="btn-login" title="Login Admin">
+                <i class="fas fa-sign-in-alt"></i>
+            </a>
+            <button class="btn-logout" onclick="logout()" title="Logout" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Dashboard</h1>
+                <p class="breadcrumb">Sistem Pendataan Inventaris Kantor</p>
+            </div>
+            <div class="header-right">
+                <div class="sync-status" title="Status sinkronisasi Google Spreadsheet">
+                    <div class="sync-indicator disconnected" id="syncStatusIndicator"></div>
+                    <span class="sync-text" id="syncStatusText">Offline</span>
+                    <button class="btn-sync" id="btnSyncNow" title="Sinkronkan ke Spreadsheet" onclick="syncAllToSpreadsheet()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Cari inventaris...">
+                </div>
+                <div class="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="date-display">
+                    <i class="fas fa-calendar"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Page -->
+        <section class="page active" id="dashboardPage">
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalLaptop">0</h3>
+                        <p>Total Laptop</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="tersedia">0</h3>
+                        <p>Tersedia</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="dipinjam">0</h3>
+                        <p>Dipinjam</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="rusak">0</h3>
+                        <p>Perlu Perbaikan</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Chart -->
+            <div class="dashboard-grid">
+                <div class="card recent-activity">
+                    <div class="card-header">
+                        <h2><i class="fas fa-clock"></i> Aktivitas Terbaru</h2>
+                        <button class="btn-refresh" onclick="loadRecentActivity()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <ul class="activity-list" id="activityList">
+                            <!-- Activity items will be loaded here -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card laptop-status">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-pie"></i> Status Inventaris</h2>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Peminjaman Aktif -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-hand-holding"></i> Peminjaman Aktif</h2>
+                    <a href="#peminjaman" class="btn-link" onclick="showPage('peminjaman')">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table" id="activeLoanTable">
+                            <thead>
+                                <tr>
+                                    <th>Nama Peminjam</th>
+                                    <th>Laptop</th>
+                                    <th>Tanggal Pinjam</th>
+                                    <th>Tanggal Kembali</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Peminjaman Page -->
+        <section class="page" id="peminjamanPage">
+            <div class="page-header">
+                <h2>Form Peminjaman Laptop</h2>
+                <p>Isi form berikut untuk meminjam laptop atau peralatan inventaris</p>
+            </div>
+
+            <div class="form-container">
+                <form id="formPeminjaman" class="modern-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="namaPeminjam">
+                                <i class="fas fa-user"></i> Nama Peminjam
+                            </label>
+                            <input type="text" id="namaPeminjam" name="namaPeminjam" required 
+                                   placeholder="Masukkan nama lengkap">
+                        </div>
+                        <div class="form-group">
+                            <label for="nip">
+                                <i class="fas fa-id-card"></i> NIP / ID Karyawan
+                            </label>
+                            <input type="text" id="nip" name="nip" required 
+                                   placeholder="Masukkan NIP">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bagian">
+                                <i class="fas fa-building"></i> Bagian / Divisi
+                            </label>
+                            <select id="bagian" name="bagian" required>
+                                <option value="">Pilih Bagian</option>
+                                <option value="Tata Usaha">Tata Usaha</option>
+                                <option value="Statistik Sosial">Statistik Sosial</option>
+                                <option value="Statistik Produksi">Statistik Produksi</option>
+                                <option value="Statistik Distribusi">Statistik Distribusi</option>
+                                <option value="IPDS">IPDS</option>
+                                <option value="Neraca">Neraca</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="noHp">
+                                <i class="fas fa-phone"></i> No. HP
+                            </label>
+                            <input type="tel" id="noHp" name="noHp" required 
+                                   placeholder="08xxxxxxxxxx">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="laptopPinjam">
+                                <i class="fas fa-laptop"></i> Pilih Laptop
+                            </label>
+                            <select id="laptopPinjam" name="laptopPinjam" required>
+                                <option value="">Pilih Laptop</option>
+                                <!-- Options will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="keperluan">
+                                <i class="fas fa-clipboard"></i> Keperluan
+                            </label>
+                            <select id="keperluan" name="keperluan" required>
+                                <option value="">Pilih Keperluan</option>
+                                <option value="Kegiatan Lapangan">Kegiatan Lapangan</option>
+                                <option value="Rapat">Rapat</option>
+                                <option value="Pelatihan">Pelatihan</option>
+                                <option value="Dinas Luar">Dinas Luar</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tglPinjam">
+                                <i class="fas fa-calendar-alt"></i> Tanggal Peminjaman
+                            </label>
+                            <input type="date" id="tglPinjam" name="tglPinjam" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tglKembali">
+                                <i class="fas fa-calendar-check"></i> Tanggal Pengembalian
+                            </label>
+                            <input type="date" id="tglKembali" name="tglKembali" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="keterangan">
+                            <i class="fas fa-comment"></i> Keterangan Tambahan
+                        </label>
+                        <textarea id="keterangan" name="keterangan" rows="3" 
+                                  placeholder="Keterangan tambahan (opsional)"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Ajukan Peminjaman
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Daftar Peminjaman -->
+            <div class="card mt-20">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> Daftar Peminjaman</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="exportPeminjaman()">
+                            <i class="fas fa-file-excel"></i> Export
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="printData('peminjaman')">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <select id="filterStatus">
+                            <option value="">Semua Status</option>
+                            <option value="Aktif">Aktif</option>
+                            <option value="Selesai">Selesai</option>
+                            <option value="Terlambat">Terlambat</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table" id="peminjamanTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>Laptop</th>
+                                    <th>Tgl Pinjam</th>
+                                    <th>Tgl Kembali</th>
+                                    <th>Keperluan</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="peminjamanTableBody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pengembalian Page -->
+        <section class="page" id="pengembalianPage">
+            <div class="page-header">
+                <h2>Form Pengembalian</h2>
+                <p>Proses pengembalian laptop dan peralatan inventaris</p>
+            </div>
+
+            <div class="form-container">
+                <form id="formPengembalian" class="modern-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="selectPeminjaman">
+                                <i class="fas fa-search"></i> Pilih Peminjaman Aktif
+                            </label>
+                            <select id="selectPeminjaman" name="selectPeminjaman" required>
+                                <option value="">Pilih peminjaman yang akan dikembalikan</option>
+                                <!-- Options will be loaded dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="detailPeminjaman" class="detail-box" style="display: none;">
+                        <h3><i class="fas fa-info-circle"></i> Detail Peminjaman</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="label">Nama Peminjam:</span>
+                                <span class="value" id="detailNama">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Laptop:</span>
+                                <span class="value" id="detailLaptop">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Tanggal Pinjam:</span>
+                                <span class="value" id="detailTglPinjam">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Tanggal Kembali:</span>
+                                <span class="value" id="detailTglKembali">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="kondisiKembali">
+                            <i class="fas fa-clipboard-check"></i> Kondisi Laptop Saat Dikembalikan
+                        </label>
+                        <select id="kondisiKembali" name="kondisiKembali" required>
+                            <option value="">Pilih Kondisi</option>
+                            <option value="Baik">Baik - Tidak ada kerusakan</option>
+                            <option value="Rusak Ringan">Rusak Ringan - Perlu perbaikan minor</option>
+                            <option value="Rusak Berat">Rusak Berat - Perlu perbaikan serius</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width" id="kerusakanGroup" style="display: none;">
+                        <label for="deskripsiKerusakan">
+                            <i class="fas fa-exclamation-triangle"></i> Deskripsi Kerusakan
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Layar tidak menyala">
+                                <span>Layar tidak menyala</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Keyboard rusak">
+                                <span>Keyboard rusak/tidak berfungsi</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Touchpad tidak berfungsi">
+                                <span>Touchpad tidak berfungsi</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Baterai bermasalah">
+                                <span>Baterai bermasalah</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Port USB rusak">
+                                <span>Port USB rusak</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Wifi tidak connect">
+                                <span>WiFi tidak connect</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Speaker tidak bunyi">
+                                <span>Speaker tidak bunyi</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="kerusakan" value="Laptop lemot/hang">
+                                <span>Laptop lemot/hang</span>
+                            </label>
+                        </div>
+                        <textarea id="kerusakanLainnya" name="kerusakanLainnya" rows="2" 
+                                  placeholder="Kerusakan lainnya (jika ada)"></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="catatanPengembalian">
+                            <i class="fas fa-sticky-note"></i> Catatan Pengembalian
+                        </label>
+                        <textarea id="catatanPengembalian" name="catatanPengembalian" rows="2" 
+                                  placeholder="Catatan tambahan (opsional)"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Proses Pengembalian
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Inventaris Page -->
+        <section class="page" id="inventarisPage">
+            <div class="page-header">
+                <h2>Daftar Inventaris</h2>
+                <p>Kelola data laptop dan peralatan inventaris kantor</p>
+            </div>
+
+            <div class="action-bar">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="showModal('modalTambahInventaris')">
+                        <i class="fas fa-plus"></i> Tambah Inventaris
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportInventaris()">
+                        <i class="fas fa-file-excel"></i> Export
+                    </button>
+                    <button class="btn btn-secondary" onclick="printData('inventaris')">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+                <div class="search-filter">
+                    <input type="text" id="searchInventaris" placeholder="Cari inventaris...">
+                    <select id="filterKondisi">
+                        <option value="">Semua Kondisi</option>
+                        <option value="Baik">Baik</option>
+                        <option value="Rusak Ringan">Rusak Ringan</option>
+                        <option value="Rusak Berat">Rusak Berat</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table" id="inventarisTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Kode</th>
+                                    <th>Nama/Merk</th>
+                                    <th>Spesifikasi</th>
+                                    <th>Kondisi</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventarisTableBody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Kerusakan Page -->
+        <section class="page" id="kerusakanPage">
+            <div class="page-header">
+                <h2>Laporan Kerusakan</h2>
+                <p>Pantau dan kelola laporan kerusakan inventaris</p>
+            </div>
+
+            <div class="stats-container small">
+                <div class="stat-card">
+                    <div class="stat-icon yellow">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="kerusakanPending">0</h3>
+                        <p>Menunggu Perbaikan</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="kerusakanProses">0</h3>
+                        <p>Dalam Perbaikan</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="kerusakanSelesai">0</h3>
+                        <p>Selesai</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Laporan Kerusakan Baru -->
+            <div class="card mb-20">
+                <div class="card-header">
+                    <h2><i class="fas fa-plus-circle"></i> Laporkan Kerusakan Baru</h2>
+                </div>
+                <div class="card-body">
+                    <form id="formLaporKerusakan" class="modern-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="laptopKerusakan">
+                                    <i class="fas fa-laptop"></i> Pilih Laptop
+                                </label>
+                                <select id="laptopKerusakan" name="laptopKerusakan" required>
+                                    <option value="">Pilih Laptop</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pelaporKerusakan">
+                                    <i class="fas fa-user"></i> Nama Pelapor
+                                </label>
+                                <input type="text" id="pelaporKerusakan" name="pelaporKerusakan" required placeholder="Nama pelapor">
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-exclamation-triangle"></i> Jenis Kerusakan</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="Layar tidak menyala">
+                                    <span>Layar tidak menyala</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="Keyboard rusak">
+                                    <span>Keyboard rusak</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="Touchpad tidak berfungsi">
+                                    <span>Touchpad tidak berfungsi</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="Baterai bermasalah">
+                                    <span>Baterai bermasalah</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="Port USB rusak">
+                                    <span>Port USB rusak</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="WiFi tidak connect">
+                                    <span>WiFi tidak connect</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="Speaker tidak bunyi">
+                                    <span>Speaker tidak bunyi</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="jenisKerusakan" value="Laptop lemot/hang">
+                                    <span>Laptop lemot/hang</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="deskripsiKerusakanLain">
+                                <i class="fas fa-comment"></i> Deskripsi Kerusakan Lainnya
+                            </label>
+                            <textarea id="deskripsiKerusakanLain" name="deskripsiKerusakanLain" rows="2" placeholder="Jelaskan kerusakan lainnya jika ada..."></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="fotoKerusakan">
+                                <i class="fas fa-camera"></i> Foto Kerusakan <span style="color: var(--text-secondary); font-weight: normal;">(Opsional)</span>
+                            </label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="fotoKerusakan" name="fotoKerusakan" accept="image/*" onchange="previewFotoKerusakan(this)">
+                                <div class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Klik atau drag foto di sini</span>
+                                    <small>Format: JPG, PNG, GIF (Max 2MB)</small>
+                                </div>
+                            </div>
+                            <div id="previewFotoKerusakan" class="preview-foto" style="display: none;">
+                                <img id="previewImg" src="" alt="Preview">
+                                <button type="button" class="btn-remove-foto" onclick="removeFotoPreview()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Kirim Laporan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> Daftar Laporan Kerusakan</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table" id="kerusakanTable">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Laptop</th>
+                                    <th>Dilaporkan Oleh</th>
+                                    <th>Jenis Kerusakan</th>
+                                    <th>Foto</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kerusakanTableBody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Riwayat Page -->
+        <section class="page" id="riwayatPage">
+            <div class="page-header">
+                <h2>Riwayat Peminjaman</h2>
+                <p>Lihat semua riwayat peminjaman inventaris</p>
+            </div>
+
+            <div class="filter-bar">
+                <div class="form-group">
+                    <label>Dari Tanggal</label>
+                    <input type="date" id="filterDari">
+                </div>
+                <div class="form-group">
+                    <label>Sampai Tanggal</label>
+                    <input type="date" id="filterSampai">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="filterRiwayatStatus">
+                        <option value="">Semua</option>
+                        <option value="Selesai">Selesai</option>
+                        <option value="Terlambat">Terlambat</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="filterRiwayat()">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <button class="btn btn-secondary" onclick="exportRiwayat()">
+                    <i class="fas fa-file-excel"></i> Export
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table" id="riwayatTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Peminjam</th>
+                                    <th>Laptop</th>
+                                    <th>Tgl Pinjam</th>
+                                    <th>Tgl Kembali</th>
+                                    <th>Durasi</th>
+                                    <th>Kondisi</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="riwayatTableBody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Management Page (Admin Only) -->
+        <section class="page" id="usersPage">
+            <div class="page-header">
+                <h2>Kelola User</h2>
+                <p>Kelola akun pengguna sistem</p>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="showModal('modalTambahUser')">
+                    <i class="fas fa-user-plus"></i> Tambah User
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-users"></i> Daftar User</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Username</th>
+                                    <th>Nama Lengkap</th>
+                                    <th>Email</th>
+                                    <th>NIP</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Tambah Inventaris -->
+    <div class="modal" id="modalTambahInventaris">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Tambah Inventaris Baru</h2>
+                <button class="close-btn" onclick="closeModal('modalTambahInventaris')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formTambahInventaris">
+                    <div class="form-group">
+                        <label for="kodeInventaris">Kode Inventaris</label>
+                        <input type="text" id="kodeInventaris" required placeholder="LPT-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="namaInventaris">Nama/Merk Laptop</label>
+                        <input type="text" id="namaInventaris" required placeholder="Lenovo ThinkPad X1">
+                    </div>
+                    <div class="form-group">
+                        <label for="spesifikasi">Spesifikasi</label>
+                        <textarea id="spesifikasi" rows="3" placeholder="Intel Core i5, RAM 8GB, SSD 256GB"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="tahunPerolehan">Tahun Perolehan</label>
+                        <input type="number" id="tahunPerolehan" placeholder="2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="kondisiAwal">Kondisi</label>
+                        <select id="kondisiAwal">
+                            <option value="Baik">Baik</option>
+                            <option value="Rusak Ringan">Rusak Ringan</option>
+                            <option value="Rusak Berat">Rusak Berat</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('modalTambahInventaris')">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kelola User (Admin Only) -->
+    <div class="modal" id="modalTambahUser">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Tambah User Baru</h2>
+                <button class="close-btn" onclick="closeModal('modalTambahUser')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formTambahUser">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newUsername">Username</label>
+                            <input type="text" id="newUsername" required placeholder="username" pattern="[a-z0-9_]+" title="Hanya huruf kecil, angka, dan underscore">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Password</label>
+                            <input type="password" id="newPassword" required placeholder="Min 6 karakter" minlength="6">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newEmail">Email</label>
+                        <input type="email" id="newEmail" required placeholder="email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="newName">Nama Lengkap</label>
+                        <input type="text" id="newName" required placeholder="Nama Lengkap">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newNIP">NIP</label>
+                            <input type="text" id="newNIP" placeholder="Opsional untuk admin">
+                        </div>
+                        <div class="form-group">
+                            <label for="newRole">Role</label>
+                            <select id="newRole" required>
+                                <option value="user">User Biasa</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('modalTambahUser')">Batal</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Berhasil!</span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p id="loadingText">Memproses...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/config.js?v=9"></script>
+    <script src="js/data.js?v=9"></script>
+    <script src="js/sync.js?v=10"></script>
+    <script src="js/auth.js?v=9"></script>
+    <script src="js/app.js?v=9"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initSyncModule();
+        var btnSync = document.getElementById('btnSyncNow');
+        if (btnSync) {
+            btnSync.onclick = syncAllToSpreadsheet;
+        }
+    });
+    </script>
+</body>
+</html>

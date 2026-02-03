@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun - Sistem Pendataan Inventaris</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --primary-light: #818CF8;
+            --success: #10B981;
+            --danger: #EF4444;
+            --bg-primary: #F8FAFC;
+            --bg-dark: #1E293B;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0F172A 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .register-header .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .register-header .logo i {
+            color: var(--primary-light);
+        }
+
+        .register-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .register-card {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .register-card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: var(--danger);
+        }
+
+        .form-group .hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .form-group .error-text {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group .error-text.show {
+            display: block;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 50px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .password-strength {
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s ease;
+        }
+
+        .password-strength-bar.weak { width: 33%; background: var(--danger); }
+        .password-strength-bar.medium { width: 66%; background: #F59E0B; }
+        .password-strength-bar.strong { width: 100%; background: var(--success); }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .message.error {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .message.success {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .message.show {
+            display: flex;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .login-link p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 480px) {
+            .register-card {
+                padding: 30px 20px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <div class="logo">
+                <i class="fas fa-laptop"></i>
+                <span>InvenTrack</span>
+            </div>
+            <p>Sistem Pendataan Inventaris Kantor</p>
+        </div>
+
+        <div class="register-card">
+            <h2><i class="fas fa-user-plus"></i> Daftar Akun Baru</h2>
+
+            <div class="message" id="message">
+                <i class="fas fa-info-circle" id="messageIcon"></i>
+                <span id="messageText"></span>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="namaLengkap">
+                            <i class="fas fa-user"></i> Nama Lengkap
+                        </label>
+                        <input type="text" id="namaLengkap" name="namaLengkap" required placeholder="Nama lengkap Anda">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nip">
+                            <i class="fas fa-id-card"></i> NIP
+                        </label>
+                        <input type="text" id="nip" name="nip" required placeholder="Nomor Induk Pegawai">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="email" name="email" required placeholder="email@example.com">
+                    <p class="error-text" id="emailError">Email sudah terdaftar!</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-at"></i> Username
+                    </label>
+                    <input type="text" id="username" name="username" required placeholder="Username untuk login" pattern="[a-z0-9_]{3,20}">
+                    <p class="hint">Huruf kecil, angka, dan underscore. Min 3 karakter.</p>
+                    <p class="error-text" id="usernameError">Username sudah digunakan!</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" name="password" required placeholder="Min. 6 karakter" minlength="6">
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', 'eyeIcon1')">
+                                <i class="fas fa-eye" id="eyeIcon1"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="passwordStrength"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-lock"></i> Konfirmasi Password
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Ulangi password">
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', 'eyeIcon2')">
+                                <i class="fas fa-eye" id="eyeIcon2"></i>
+                            </button>
+                        </div>
+                        <p class="error-text" id="confirmError">Password tidak cocok!</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                    <i class="fas fa-user-plus"></i> Daftar Sekarang
+                </button>
+            </form>
+
+            <div class="login-link">
+                <p>Sudah punya akun? <a href="login.html">Masuk di sini</a></p>
+            </div>
+        </div>
+
+        <p class="footer-text">© 2026 Sistem Pendataan Inventaris - BPS</p>
+    </div>
+
+    <script>
+        // Get users from localStorage
+        function getUsers() {
+            const users = localStorage.getItem('users');
+            return users ? JSON.parse(users) : [];
+        }
+
+        // Save users to localStorage
+        function saveUsers(users) {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        // Generate ID
+        function generateId() {
+            return 'U' + Date.now() + Math.random().toString(36).substr(2, 5);
+        }
+
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Check username availability
+        document.getElementById('username').addEventListener('input', function() {
+            const username = this.value.toLowerCase();
+            const users = getUsers();
+            const exists = users.some(u => u.username === username);
+            
+            const errorEl = document.getElementById('usernameError');
+            if (exists && username.length >= 3) {
+                this.classList.add('error');
+                errorEl.classList.add('show');
+            } else {
+                this.classList.remove('error');
+                errorEl.classList.remove('show');
+            }
+        });
+
+        // Check email availability
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value.toLowerCase();
+            const users = getUsers();
+            const exists = users.some(u => u.email === email);
+            
+            const errorEl = document.getElementById('emailError');
+            if (exists && email.length > 5) {
+                this.classList.add('error');
+                errorEl.classList.add('show');
+            } else {
+                this.classList.remove('error');
+                errorEl.classList.remove('show');
+            }
+        });
+
+        // Check password strength
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('passwordStrength');
+            
+            strengthBar.className = 'password-strength-bar';
+            
+            if (password.length < 6) {
+                strengthBar.classList.add('weak');
+            } else if (password.length < 10 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+                strengthBar.classList.add('medium');
+            } else {
+                strengthBar.classList.add('strong');
+            }
+        });
+
+        // Check confirm password match
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirm = this.value;
+            const errorEl = document.getElementById('confirmError');
+            
+            if (confirm.length > 0 && password !== confirm) {
+                this.classList.add('error');
+                errorEl.classList.add('show');
+            } else {
+                this.classList.remove('error');
+                errorEl.classList.remove('show');
+            }
+        });
+
+        // Handle registration
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const namaLengkap = document.getElementById('namaLengkap').value.trim();
+            const nip = document.getElementById('nip').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const users = getUsers();
+            
+            // Validations
+            if (users.some(u => u.username === username)) {
+                showMessage('Username sudah digunakan!', 'error');
+                return;
+            }
+            
+            if (users.some(u => u.email === email)) {
+                showMessage('Email sudah terdaftar!', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('Password dan konfirmasi tidak cocok!', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password minimal 6 karakter!', 'error');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: generateId(),
+                username: username,
+                password: password,
+                email: email,
+                name: namaLengkap,
+                nip: nip,
+                role: 'user', // Default role is user
+                status: 'active',
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            saveUsers(users);
+            
+            showMessage('Pendaftaran berhasil! Silakan login.', 'success');
+            
+            // Redirect to login after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        });
+
+        // Show message
+        function showMessage(text, type) {
+            const msgEl = document.getElementById('message');
+            const msgText = document.getElementById('messageText');
+            const msgIcon = document.getElementById('messageIcon');
+            
+            msgText.textContent = text;
+            msgEl.className = 'message show ' + type;
+            
+            if (type === 'error') {
+                msgIcon.className = 'fas fa-exclamation-circle';
+            } else {
+                msgIcon.className = 'fas fa-check-circle';
+            }
+        }
+
+        // Toggle password visibility
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>
